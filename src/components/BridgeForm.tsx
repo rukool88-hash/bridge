@@ -13,6 +13,7 @@ import {
   createPublicClient, http, type Address,
 } from 'viem';
 import { bsc, mainnet, polygon, base } from 'wagmi/chains';
+import type { Chain } from 'viem';
 import { CHAINS, type ChainKey } from '../config/chains';
 import { type TokenKey } from '../config/tokens';
 import { useAllTokens } from '../config/customTokens';
@@ -22,7 +23,7 @@ import { ethBridgeAbi } from '../abi/ethBridge';
 import { lzV1OFTAbi } from '../abi/lzV1OFT';
 import { oftAbi } from '../abi/oft';
 
-const CHAIN_ID_TO_VIEM: Record<number, typeof bsc> = {
+const CHAIN_ID_TO_VIEM: Record<number, Chain> = {
   56: bsc, 1: mainnet, 137: polygon, 8453: base,
 };
 
