@@ -105,6 +105,53 @@ export const TOKENS: Record<string, TokenConfig> = {
     },
   },
 
+  BRZ: {
+    symbol: 'BRZ',
+    name: 'Brazilian Digital',
+    /**
+     * MAIV NTT 协议代币：BRZ
+     *
+     * 桥接合约（3 链共用）：0x8469783eDd405210a5438a4568eA4D0dbcC9CF7f
+     *
+     * Polygon → Base 示例：
+     *   tx: https://polygonscan.com/tx/0x1598621092a18a500f5e02105e4177be2bb777c5e33f0589fef5e0777fc733c6
+     *   recipientChain = 30（Base 内部 ID），shouldQueue = false，instr = 0x01000101
+     *
+     * Base → Polygon 示例：
+     *   tx: https://basescan.org/tx/0x9a6382ea0e8766f752b0dc5695d8436393b354aae69b7e5700c776ebffddb7c0
+     *   recipientChain = 5（Polygon 内部 ID），shouldQueue = false，instr = 0x01000101
+     *
+     * Polygon → Avalanche 示例：
+     *   tx: https://polygonscan.com/tx/0xe0b7180d971cd1dfb5a18505e07a8541ff761484132e36b2bfef16b6a89be53a
+     *   recipientChain = 6（Avalanche 内部 ID），shouldQueue = false，instr = 0x01000100
+     *
+     * Avalanche → Base 示例：
+     *   tx: https://basescan.org/tx/0xdadcf64a4efd68cb132754c340e83b4d3d2c8129eac567beeacf84f472d548bc
+     *   recipientChain = 6（Avalanche 内部 ID），shouldQueue = false，instr = 0x01000101
+     */
+    protocol: 'maivNtt',
+    // 支持 Polygon / Base / Avalanche 三链之间互相跨（通过内部链 ID 映射）
+    chainPairs: [
+      ['polygon', 'base'],
+      ['polygon', 'avax'],
+      ['base', 'avax'],
+    ],
+    chains: {
+      polygon: {
+        tokenAddress: '0x4eD141110F6EeeAbA9A1df36d8c26f684d2475Dc',
+        bridgeAddress: '0x8469783eDd405210a5438a4568eA4D0dbcC9CF7f',
+      },
+      base: {
+        tokenAddress: '0xE9185Ee218cae427aF7B9764A011bb89FeA761B4',
+        bridgeAddress: '0x8469783eDd405210a5438a4568eA4D0dbcC9CF7f',
+      },
+      avax: {
+        tokenAddress: '0x05539F021b66Fd01d1FB1ff8E167CdD09bf7c2D0',
+        bridgeAddress: '0x8469783eDd405210a5438a4568eA4D0dbcC9CF7f',
+      },
+    },
+  },
+
   ZCX: {
     symbol: 'ZCX',
     name: 'ZCX Token',

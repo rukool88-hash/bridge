@@ -12,7 +12,7 @@ import {
   parseUnits, formatUnits, encodePacked, encodeAbiParameters,
   createPublicClient, http, type Address,
 } from 'viem';
-import { bsc, mainnet, polygon, base, optimism } from 'wagmi/chains';
+import { bsc, mainnet, polygon, base, optimism, avalanche } from 'wagmi/chains';
 import type { Chain } from 'viem';
 import { CHAINS, type ChainKey } from '../config/chains';
 import { type TokenKey } from '../config/tokens';
@@ -30,6 +30,7 @@ const CHAIN_ID_TO_VIEM: Record<number, Chain> = {
   137: polygon,
  8453: base,
    10: optimism,
+43114: avalanche,
 };
 
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000' as Address;
@@ -181,6 +182,20 @@ export function BridgeForm() {
   const isMaivNtt   = tokenCfg.protocol === 'maivNtt';
   const needsQuote  = !(isBobaFixed || isMaivNtt);
 
+  // MAIV NTT 内部链配置：每个代币在各链上的内部 ID 与 shouldQueue
+  type MaivNttChainConfig = { internalId: number; shouldQueueOut: boolean };
+  const MAIV_NTT_CONFIG: Partial<Record<TokenKey, Partial<Record<ChainKey, MaivNttChainConfig>>>> = {
+    MAIV: {
+      eth:  { internalId: 2,  shouldQueueOut: true },
+      base: { internalId: 30, shouldQueueOut: false },
+    },
+    BRZ: {
+      polygon: { internalId: 5,  shouldQueueOut: false }, // Polygon
+      base:    { internalId: 30, shouldQueueOut: false }, // Base
+      avax:    { internalId: 6,  shouldQueueOut: false }, // Avalanche
+    },
+  };
+
   // ── 获取跨链费用 ──────────────────────────────────────────────
   const handleQuote = async () => {
     setQuoteError(null);
@@ -304,14 +319,15 @@ export function BridgeForm() {
         }
 
       } else if (tokenCfg.protocol === 'maivNtt') {
-        // MAIV NTT：ETH ↔ BASE 双向，均调用同一桥接合约 transfer
-        if (!((safeFromChain === 'eth' && toChain === 'base') ||
-              (safeFromChain === 'base' && toChain === 'eth'))) {
-          setSendError('MAIV 目前仅支持 Ethereum 与 BASE 之间的跨链');
+        // MAIV NTT：根据代币与链配置选择内部链 ID / shouldQueue
+        const perToken = MAIV_NTT_CONFIG[tokenKey];
+        const fromCfg = perToken?.[safeFromChain];
+        const toCfg   = perToken?.[toChain];
+        if (!fromCfg || !toCfg) {
+          setSendError('该 MAIV 协议代币暂不支持此链对');
           return;
         }
-        // 按目标链选择协议内部链 ID：ETH=2，BASE=30
-        const maivChainId = toChain === 'eth' ? 2 : 30;
+        const maivChainId = toCfg.internalId;
         const recipientAddr = (recipient && recipient.startsWith('0x') ? recipient : address) as Address;
         const recipientBytes = addressToBytes32(recipientAddr);
         const refundBytes = addressToBytes32(address as Address);
@@ -321,11 +337,15 @@ export function BridgeForm() {
           functionName: 'transfer',
           args: [
             amountWei,
-            maivChainId,        // recipientChain: 协议内部链 ID（ETH=2，BASE=30）
+            maivChainId,        // recipientChain: 协议内部链 ID
             recipientBytes,     // recipient
             refundBytes,        // refundAddress
-            safeFromChain === 'eth', // shouldQueue: ETH→BASE 为 true，BASE→ETH 为 false（按样本 tx）
-            '0x01000101',       // transceiverInstructions（常量）
+            fromCfg.shouldQueueOut,
+            // transceiverInstructions：目前样本中除 Polygon→Avalanche 为 0x01000100，其余均为 0x01000101，
+            // 简化处理：当 safeFromChain=polygon 且 toChain=avax 时用 0x01000100，否则 0x01000101
+            (safeFromChain === 'polygon' && toChain === 'avax'
+              ? '0x01000100'
+              : '0x01000101'),
           ],
           value: fee,
         });
@@ -395,11 +415,12 @@ export function BridgeForm() {
           /unrecognized|unknown chain/i.test(switchErr.message));
       if (isMissing && typeof window !== 'undefined' && (window as any).ethereum) {
         const CHAIN_PARAMS: Record<number, object> = {
-          56:   { chainId: '0x38',   chainName: 'BNB Smart Chain',   nativeCurrency: { name: 'BNB',   symbol: 'BNB', decimals: 18 }, rpcUrls: ['https://bsc.publicnode.com'],                                                blockExplorerUrls: ['https://bscscan.com'] },
-           1:   { chainId: '0x1',    chainName: 'Ethereum Mainnet',  nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://eth-mainnet.g.alchemy.com/v2/xQ2zrEsiX-z3aSnxG0nMU'],   blockExplorerUrls: ['https://etherscan.io'] },
-         137:  { chainId: '0x89',   chainName: 'Polygon Mainnet',   nativeCurrency: { name: 'POL',   symbol: 'POL', decimals: 18 }, rpcUrls: ['https://polygon-mainnet.g.alchemy.com/v2/xQ2zrEsiX-z3aSnxG0nMU'], blockExplorerUrls: ['https://polygonscan.com'] },
-        8453:  { chainId: '0x2105', chainName: 'Base Mainnet',      nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://base-mainnet.g.alchemy.com/v2/xQ2zrEsiX-z3aSnxG0nMU'],   blockExplorerUrls: ['https://basescan.org'] },
-          10:  { chainId: '0xa',    chainName: 'Optimism Mainnet',  nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://opt-mainnet.g.alchemy.com/v2/xQ2zrEsiX-z3aSnxG0nMU'],    blockExplorerUrls: ['https://optimistic.etherscan.io'] },
+          56:    { chainId: '0x38',   chainName: 'BNB Smart Chain',   nativeCurrency: { name: 'BNB',   symbol: 'BNB', decimals: 18 }, rpcUrls: ['https://bsc.publicnode.com'],                                                blockExplorerUrls: ['https://bscscan.com'] },
+           1:    { chainId: '0x1',    chainName: 'Ethereum Mainnet',  nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://eth-mainnet.g.alchemy.com/v2/xQ2zrEsiX-z3aSnxG0nMU'],   blockExplorerUrls: ['https://etherscan.io'] },
+         137:   { chainId: '0x89',   chainName: 'Polygon Mainnet',   nativeCurrency: { name: 'POL',   symbol: 'POL', decimals: 18 }, rpcUrls: ['https://polygon-mainnet.g.alchemy.com/v2/xQ2zrEsiX-z3aSnxG0nMU'], blockExplorerUrls: ['https://polygonscan.com'] },
+        8453:   { chainId: '0x2105', chainName: 'Base Mainnet',      nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://base-mainnet.g.alchemy.com/v2/xQ2zrEsiX-z3aSnxG0nMU'],   blockExplorerUrls: ['https://basescan.org'] },
+          10:   { chainId: '0xa',    chainName: 'Optimism Mainnet',  nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://opt-mainnet.g.alchemy.com/v2/xQ2zrEsiX-z3aSnxG0nMU'],    blockExplorerUrls: ['https://optimistic.etherscan.io'] },
+       43114:   { chainId: '0xa86a', chainName: 'Avalanche Mainnet', nativeCurrency: { name: 'AVAX',  symbol: 'AVAX', decimals: 18 }, rpcUrls: ['https://avax-mainnet.g.alchemy.com/v2/xQ2zrEsiX-z3aSnxG0nMU'],  blockExplorerUrls: ['https://snowtrace.io'] },
         };
         try {
           await (window as any).ethereum.request({

@@ -50,6 +50,17 @@ export const CHAINS = {
     rpcUrl: 'https://base-mainnet.g.alchemy.com/v2/xQ2zrEsiX-z3aSnxG0nMU',
     blockExplorer: 'https://basescan.org',
   },
+  avax: {
+    chainId: 43114,
+    name: 'Avalanche',
+    nativeSymbol: 'AVAX',
+    // 当前项目中未使用 LZ V2，EID 暂置为 0
+    eid: 0 as const,
+    // Avalanche 的 LayerZero V1 chain ID，当前未使用，仅预留
+    lzV1ChainId: 106 as const,
+    rpcUrl: 'https://avax-mainnet.g.alchemy.com/v2/xQ2zrEsiX-z3aSnxG0nMU',
+    blockExplorer: 'https://snowtrace.io',
+  },
 } as const;
 
 export type ChainKey = keyof typeof CHAINS;

@@ -12,6 +12,7 @@ export const TOKEN_ADDRESS: Record<ChainKey, `0x${string}`> = {
   polygon: ZERO,
   op: ZERO,
   base: ZERO,
+  avax: ZERO,
 };
 
 /** 各链上的 LayerZero OFT 桥接应用合约（OFTAdapter），仅 BOBA 使用 */
@@ -21,4 +22,5 @@ export const OFT_ADDRESS: Record<ChainKey, `0x${string}`> = {
   polygon: ZERO,
   op: ZERO,
   base: ZERO,
+  avax: ZERO,
 };
