@@ -2,7 +2,7 @@ import type { ChainKey } from './chains';
 import type { Address } from 'viem';
 
 /** 桥接协议类型 */
-export type BridgeProtocol = 'bobaCustom' | 'lzV1OFT' | 'lzV2OFT' | 'zcxCustom';
+export type BridgeProtocol = 'bobaCustom' | 'lzV1OFT' | 'lzV2OFT' | 'zcxCustom' | 'maivNtt';
 
 export type ChainTokenConfig = {
   tokenAddress: Address;
@@ -66,6 +66,39 @@ export const TOKENS: Record<string, TokenConfig> = {
       base: {
         tokenAddress: '0x9483ab65847a447e36d21af1cab8c87e9712ff93',
         bridgeAddress: '0x9483ab65847A447e36d21af1CaB8C87e9712ff93',
+      },
+    },
+  },
+
+  MAIV: {
+    symbol: 'MAIV',
+    name: 'Maiv Token',
+    /**
+     * 新协议：MAIV NTT 桥接（非 LayerZero）
+     *
+     * - ETH 侧：调用桥接合约 0x3738... 的 transfer(amount, recipientChain, recipient, refundAddress, shouldQueue, transceiverInstructions)
+     *   方法 ID: 0xb293f97f
+     *   示例 tx: https://etherscan.io/tx/0x29d926660c35132d5f5d21d94fc5eb3d2da80dfa6ae73289889dafebdd274a37
+     *   关键参数:
+     *     - recipientChain: 30 (协议内部 Base 链 ID)
+     *     - recipient / refundAddress: 用户地址 bytes32 右对齐
+     *     - shouldQueue: true
+     *     - transceiverInstructions: 0x01000101（常量）
+     *
+     * - Base 侧：桥接合约 0x8321... 的 transfer(...) 参数更复杂（带 executorArgs / feeArgs 结构），
+     *   目前前端仅支持从 ETH → Base 的用户发起方向；Base → ETH 后续如有需要可按更多样本交易单独补充。
+     */
+    protocol: 'maivNtt',
+    // 目前仅支持 ETH → BASE 方向
+    chainPairs: [['eth', 'base']],
+    chains: {
+      eth: {
+        tokenAddress: '0x39903a1A6f289A67E0DE94096915c4ccD506Ab2a',
+        bridgeAddress: '0x373821335A7FF64d9768AeDa7C47a25dB7AC0221',
+      },
+      base: {
+        tokenAddress: '0x4b82AC0D1531290E3eDb3Abe9a985623Bf7EDAEE',
+        bridgeAddress: '0x83216747fC21b86173D800E2960c0D5395de0F30',
       },
     },
   },

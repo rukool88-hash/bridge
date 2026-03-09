@@ -22,6 +22,7 @@ import { bnbBridgeAbi } from '../abi/bnbBridge';
 import { ethBridgeAbi } from '../abi/ethBridge';
 import { lzV1OFTAbi } from '../abi/lzV1OFT';
 import { oftAbi } from '../abi/oft';
+import { maivEthBridgeAbi } from '../abi/maivEthBridge';
 
 const CHAIN_ID_TO_VIEM: Record<number, Chain> = {
    56: bsc,
@@ -177,7 +178,8 @@ export function BridgeForm() {
     tokenCfg.protocol !== 'lzV2OFT' &&
     allowance != null && amountWei > 0n && allowance < amountWei;
   const isBobaFixed = tokenCfg.protocol === 'bobaCustom';
-  const needsQuote   = tokenCfg.protocol !== 'bobaCustom';
+  const isMaivNtt   = tokenCfg.protocol === 'maivNtt';
+  const needsQuote  = !(isBobaFixed || isMaivNtt);
 
   // ── 获取跨链费用 ──────────────────────────────────────────────
   const handleQuote = async () => {
@@ -271,7 +273,12 @@ export function BridgeForm() {
   // ── 发送跨链 ──────────────────────────────────────────────────
   const handleSend = async () => {
     if (!address || amountWei <= 0n) return;
-    const fee = isBobaFixed ? (fromTokenCfg.defaultFeeEstimate ?? 0n) : quoteNative;
+    const fee =
+      tokenCfg.protocol === 'bobaCustom'
+        ? (fromTokenCfg.defaultFeeEstimate ?? 0n)
+        : tokenCfg.protocol === 'maivNtt'
+          ? 0n
+          : quoteNative;
     if (fee == null) { setSendError('请先点击「获取跨链费用」'); return; }
     setSendError(null);
     setTxHash(null);
@@ -295,6 +302,30 @@ export function BridgeForm() {
             value: fee,
           });
         }
+
+      } else if (tokenCfg.protocol === 'maivNtt') {
+        // MAIV NTT：目前仅支持 ETH → BASE，调用 ETH 侧桥接合约 transfer
+        if (safeFromChain !== 'eth' || toChain !== 'base') {
+          setSendError('MAIV 当前仅支持从 Ethereum 到 BASE 的跨链');
+          return;
+        }
+        const recipientAddr = (recipient && recipient.startsWith('0x') ? recipient : address) as Address;
+        const recipientBytes = addressToBytes32(recipientAddr);
+        const refundBytes = addressToBytes32(address as Address);
+        hash = await sendContractAsync({
+          address: fromTokenCfg.bridgeAddress,
+          abi: maivEthBridgeAbi,
+          functionName: 'transfer',
+          args: [
+            amountWei,
+            30,                 // recipientChain: 协议内部 Base 链 ID
+            recipientBytes,     // recipient
+            refundBytes,        // refundAddress
+            true,               // shouldQueue
+            '0x01000101',       // transceiverInstructions（常量）
+          ],
+          value: fee,
+        });
 
       } else if (tokenCfg.protocol === 'lzV2OFT') {
         // LZ V2 OFT：标准 send(sendParam, fee, refundAddress)
@@ -361,10 +392,11 @@ export function BridgeForm() {
           /unrecognized|unknown chain/i.test(switchErr.message));
       if (isMissing && typeof window !== 'undefined' && (window as any).ethereum) {
         const CHAIN_PARAMS: Record<number, object> = {
-          56:   { chainId: '0x38',   chainName: 'BNB Smart Chain',   nativeCurrency: { name: 'BNB',   symbol: 'BNB', decimals: 18 }, rpcUrls: ['https://bsc.publicnode.com'],            blockExplorerUrls: ['https://bscscan.com'] },
-          1:    { chainId: '0x1',    chainName: 'Ethereum Mainnet',   nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://eth-mainnet.g.alchemy.com/v2/xQ2zrEsiX-z3aSnxG0nMU'],  blockExplorerUrls: ['https://etherscan.io'] },
-          137:  { chainId: '0x89',   chainName: 'Polygon Mainnet',    nativeCurrency: { name: 'POL',   symbol: 'POL', decimals: 18 }, rpcUrls: ['https://polygon-mainnet.g.alchemy.com/v2/xQ2zrEsiX-z3aSnxG0nMU'], blockExplorerUrls: ['https://polygonscan.com'] },
-          8453: { chainId: '0x2105', chainName: 'Base Mainnet',       nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://base-mainnet.g.alchemy.com/v2/xQ2zrEsiX-z3aSnxG0nMU'],  blockExplorerUrls: ['https://basescan.org'] },
+          56:   { chainId: '0x38',   chainName: 'BNB Smart Chain',   nativeCurrency: { name: 'BNB',   symbol: 'BNB', decimals: 18 }, rpcUrls: ['https://bsc.publicnode.com'],                                                blockExplorerUrls: ['https://bscscan.com'] },
+           1:   { chainId: '0x1',    chainName: 'Ethereum Mainnet',  nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://eth-mainnet.g.alchemy.com/v2/xQ2zrEsiX-z3aSnxG0nMU'],   blockExplorerUrls: ['https://etherscan.io'] },
+         137:  { chainId: '0x89',   chainName: 'Polygon Mainnet',   nativeCurrency: { name: 'POL',   symbol: 'POL', decimals: 18 }, rpcUrls: ['https://polygon-mainnet.g.alchemy.com/v2/xQ2zrEsiX-z3aSnxG0nMU'], blockExplorerUrls: ['https://polygonscan.com'] },
+        8453:  { chainId: '0x2105', chainName: 'Base Mainnet',      nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://base-mainnet.g.alchemy.com/v2/xQ2zrEsiX-z3aSnxG0nMU'],   blockExplorerUrls: ['https://basescan.org'] },
+          10:  { chainId: '0xa',    chainName: 'Optimism Mainnet',  nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://opt-mainnet.g.alchemy.com/v2/xQ2zrEsiX-z3aSnxG0nMU'],    blockExplorerUrls: ['https://optimistic.etherscan.io'] },
         };
         try {
           await (window as any).ethereum.request({
@@ -470,7 +502,7 @@ export function BridgeForm() {
           </p>
         </div>
       )}
-      {!isBobaFixed && quoteNative != null && (
+      {!isBobaFixed && !isMaivNtt && quoteNative != null && (
         <div className="fee-info">
           <p>
             预计跨链费用：{formatUnits(quoteNative, 18)} {fromChainCfg.nativeSymbol}

@@ -1,0 +1,41 @@
+export const maivEthBridgeAbi = [
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'amount',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint16',
+        name: 'recipientChain',
+        type: 'uint16',
+      },
+      {
+        internalType: 'bytes32',
+        name: 'recipient',
+        type: 'bytes32',
+      },
+      {
+        internalType: 'bytes32',
+        name: 'refundAddress',
+        type: 'bytes32',
+      },
+      {
+        internalType: 'bool',
+        name: 'shouldQueue',
+        type: 'bool',
+      },
+      {
+        internalType: 'bytes',
+        name: 'transceiverInstructions',
+        type: 'bytes',
+      },
+    ],
+    name: 'transfer',
+    outputs: [],
+    stateMutability: 'payable',
+    type: 'function',
+  },
+] as const;
+
