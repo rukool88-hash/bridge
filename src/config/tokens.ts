@@ -49,11 +49,19 @@ export const TOKENS: Record<string, TokenConfig> = {
     symbol: 'wUSDR',
     name: 'Wrapped USDR',
     protocol: 'lzV1OFT',
-    chainPairs: [['polygon', 'base']],
+    // 支持 Polygon ↔ BASE 与 Optimism ↔ BASE
+    chainPairs: [
+      ['polygon', 'base'],
+      ['op', 'base'],
+    ],
     chains: {
       polygon: {
         tokenAddress: '0x00e8c0e92eb3ad88189e7125ec8825edc03ab265',
         bridgeAddress: '0x00e8c0E92eB3Ad88189E7125Ec8825eDc03Ab265',
+      },
+      op: {
+        tokenAddress: '0xC03b43d492d904406db2d7D57e67C7e8234bA752',
+        bridgeAddress: '0xC03b43d492d904406db2d7D57e67C7e8234bA752',
       },
       base: {
         tokenAddress: '0x9483ab65847a447e36d21af1cab8c87e9712ff93',

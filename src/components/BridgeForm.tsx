@@ -12,7 +12,7 @@ import {
   parseUnits, formatUnits, encodePacked, encodeAbiParameters,
   createPublicClient, http, type Address,
 } from 'viem';
-import { bsc, mainnet, polygon, base } from 'wagmi/chains';
+import { bsc, mainnet, polygon, base, optimism } from 'wagmi/chains';
 import type { Chain } from 'viem';
 import { CHAINS, type ChainKey } from '../config/chains';
 import { type TokenKey } from '../config/tokens';
@@ -24,7 +24,11 @@ import { lzV1OFTAbi } from '../abi/lzV1OFT';
 import { oftAbi } from '../abi/oft';
 
 const CHAIN_ID_TO_VIEM: Record<number, Chain> = {
-  56: bsc, 1: mainnet, 137: polygon, 8453: base,
+   56: bsc,
+    1: mainnet,
+  137: polygon,
+ 8453: base,
+   10: optimism,
 };
 
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000' as Address;

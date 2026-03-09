@@ -31,6 +31,16 @@ export const CHAINS = {
     rpcUrl: 'https://polygon-mainnet.g.alchemy.com/v2/xQ2zrEsiX-z3aSnxG0nMU',
     blockExplorer: 'https://polygonscan.com',
   },
+  op: {
+    chainId: 10,
+    name: 'Optimism',
+    nativeSymbol: 'ETH',
+    // 当前项目中未使用 LZ V2，EID 预留为 0
+    eid: 0 as const,
+    lzV1ChainId: 111 as const, // LayerZero V1 Optimism chain ID
+    rpcUrl: 'https://opt-mainnet.g.alchemy.com/v2/xQ2zrEsiX-z3aSnxG0nMU',
+    blockExplorer: 'https://optimistic.etherscan.io',
+  },
   base: {
     chainId: 8453,
     name: 'BASE',
