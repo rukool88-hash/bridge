@@ -14,6 +14,7 @@ const METHOD_MAP: Record<string, { protocol: BridgeProtocol; label: string }> = 
   '0x51905636': { protocol: 'lzV1OFT',   label: 'LayerZero V1 OFT sendFrom (lzV1OFT)' },
   '0x6fb2be6d': { protocol: 'bobaCustom', label: 'Boba withdraw BNB→ETH (bobaCustom)' },
   '0x0d265fdb': { protocol: 'bobaCustom', label: 'Boba depositERC20 ETH→BNB (bobaCustom)' },
+  '0xb293f97f': { protocol: 'maivNtt',    label: 'MAIV NTT transfer (maivNtt)' },
 };
 
 type Decoded = {
@@ -44,6 +45,7 @@ const PROTOCOL_OPTIONS: { value: BridgeProtocol; label: string }[] = [
   { value: 'zcxCustom',  label: 'zcxCustom — Unizen 桥 (0xd041024c)' },
   { value: 'lzV1OFT',   label: 'lzV1OFT — LayerZero V1 sendFrom' },
   { value: 'bobaCustom', label: 'bobaCustom — Boba 自定义桥' },
+  { value: 'maivNtt',    label: 'maivNtt — MAIV NTT transfer (0xb293f97f)' },
 ];
 
 type FormData = {

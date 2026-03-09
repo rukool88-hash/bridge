@@ -85,11 +85,13 @@ export const TOKENS: Record<string, TokenConfig> = {
      *     - shouldQueue: true
      *     - transceiverInstructions: 0x01000101（常量）
      *
-     * - Base 侧：桥接合约 0x8321... 的 transfer(...) 参数更复杂（带 executorArgs / feeArgs 结构），
-     *   目前前端仅支持从 ETH → Base 的用户发起方向；Base → ETH 后续如有需要可按更多样本交易单独补充。
+     * - Base 侧：同样直接调用 0x3738... 的 transfer(uint256,uint16,bytes32,bytes32,bool,bytes)
+     *   示例 tx: https://basescan.org/tx/0x3beb9dd2759fdb972737023495445e787fff9ea4dd524b5e696a38983eda194c
+     *   其中 recipientChain=2（内部 Ethereum 链 ID），recipient/refundAddress 为用户地址，shouldQueue=false，
+     *   transceiverInstructions 同样为 0x01000101。
      */
     protocol: 'maivNtt',
-    // 目前仅支持 ETH → BASE 方向
+    // 支持 ETH ↔ BASE 双向（内部链 ID：ETH=2，BASE=30）
     chainPairs: [['eth', 'base']],
     chains: {
       eth: {
@@ -98,7 +100,7 @@ export const TOKENS: Record<string, TokenConfig> = {
       },
       base: {
         tokenAddress: '0x4b82AC0D1531290E3eDb3Abe9a985623Bf7EDAEE',
-        bridgeAddress: '0x83216747fC21b86173D800E2960c0D5395de0F30',
+        bridgeAddress: '0x373821335A7FF64d9768AeDa7C47a25dB7AC0221',
       },
     },
   },

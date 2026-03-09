@@ -304,11 +304,14 @@ export function BridgeForm() {
         }
 
       } else if (tokenCfg.protocol === 'maivNtt') {
-        // MAIV NTT：目前仅支持 ETH → BASE，调用 ETH 侧桥接合约 transfer
-        if (safeFromChain !== 'eth' || toChain !== 'base') {
-          setSendError('MAIV 当前仅支持从 Ethereum 到 BASE 的跨链');
+        // MAIV NTT：ETH ↔ BASE 双向，均调用同一桥接合约 transfer
+        if (!((safeFromChain === 'eth' && toChain === 'base') ||
+              (safeFromChain === 'base' && toChain === 'eth'))) {
+          setSendError('MAIV 目前仅支持 Ethereum 与 BASE 之间的跨链');
           return;
         }
+        // 按目标链选择协议内部链 ID：ETH=2，BASE=30
+        const maivChainId = toChain === 'eth' ? 2 : 30;
         const recipientAddr = (recipient && recipient.startsWith('0x') ? recipient : address) as Address;
         const recipientBytes = addressToBytes32(recipientAddr);
         const refundBytes = addressToBytes32(address as Address);
@@ -318,10 +321,10 @@ export function BridgeForm() {
           functionName: 'transfer',
           args: [
             amountWei,
-            30,                 // recipientChain: 协议内部 Base 链 ID
+            maivChainId,        // recipientChain: 协议内部链 ID（ETH=2，BASE=30）
             recipientBytes,     // recipient
             refundBytes,        // refundAddress
-            true,               // shouldQueue
+            safeFromChain === 'eth', // shouldQueue: ETH→BASE 为 true，BASE→ETH 为 false（按样本 tx）
             '0x01000101',       // transceiverInstructions（常量）
           ],
           value: fee,
