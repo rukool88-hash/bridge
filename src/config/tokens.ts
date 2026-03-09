@@ -152,6 +152,57 @@ export const TOKENS: Record<string, TokenConfig> = {
     },
   },
 
+  BRZ0: {
+    symbol: 'BRZ0',
+    name: 'BRZ (POLY ↔ BASE)',
+    protocol: 'maivNtt',
+    chainPairs: [['polygon', 'base']],
+    chains: {
+      polygon: {
+        tokenAddress: '0x4eD141110F6EeeAbA9A1df36d8c26f684d2475Dc',
+        bridgeAddress: '0x8469783eDd405210a5438a4568eA4D0dbcC9CF7f',
+      },
+      base: {
+        tokenAddress: '0xE9185Ee218cae427aF7B9764A011bb89FeA761B4',
+        bridgeAddress: '0x8469783eDd405210a5438a4568eA4D0dbcC9CF7f',
+      },
+    },
+  },
+
+  BRZ1: {
+    symbol: 'BRZ1',
+    name: 'BRZ (POLY ↔ AVAX)',
+    protocol: 'maivNtt',
+    chainPairs: [['polygon', 'avax']],
+    chains: {
+      polygon: {
+        tokenAddress: '0x4eD141110F6EeeAbA9A1df36d8c26f684d2475Dc',
+        bridgeAddress: '0x8469783eDd405210a5438a4568eA4D0dbcC9CF7f',
+      },
+      avax: {
+        tokenAddress: '0x05539F021b66Fd01d1FB1ff8E167CdD09bf7c2D0',
+        bridgeAddress: '0x8469783eDd405210a5438a4568eA4D0dbcC9CF7f',
+      },
+    },
+  },
+
+  BRZ2: {
+    symbol: 'BRZ2',
+    name: 'BRZ (AVAX ↔ BASE)',
+    protocol: 'maivNtt',
+    chainPairs: [['avax', 'base']],
+    chains: {
+      avax: {
+        tokenAddress: '0x05539F021b66Fd01d1FB1ff8E167CdD09bf7c2D0',
+        bridgeAddress: '0x8469783eDd405210a5438a4568eA4D0dbcC9CF7f',
+      },
+      base: {
+        tokenAddress: '0xE9185Ee218cae427aF7B9764A011bb89FeA761B4',
+        bridgeAddress: '0x8469783eDd405210a5438a4568eA4D0dbcC9CF7f',
+      },
+    },
+  },
+
   ZCX: {
     symbol: 'ZCX',
     name: 'ZCX Token',

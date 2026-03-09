@@ -190,9 +190,21 @@ export function BridgeForm() {
       base: { internalId: 30, shouldQueueOut: false },
     },
     BRZ: {
-      polygon: { internalId: 5,  shouldQueueOut: false }, // Polygon
-      base:    { internalId: 30, shouldQueueOut: false }, // Base
-      avax:    { internalId: 6,  shouldQueueOut: false }, // Avalanche
+      polygon: { internalId: 5,  shouldQueueOut: false },
+      base:    { internalId: 30, shouldQueueOut: false },
+      avax:    { internalId: 6,  shouldQueueOut: false },
+    },
+    BRZ0: {
+      polygon: { internalId: 5,  shouldQueueOut: false },
+      base:    { internalId: 30, shouldQueueOut: false },
+    },
+    BRZ1: {
+      polygon: { internalId: 5,  shouldQueueOut: false },
+      avax:    { internalId: 6,  shouldQueueOut: false },
+    },
+    BRZ2: {
+      avax: { internalId: 6,  shouldQueueOut: false },
+      base: { internalId: 30, shouldQueueOut: false },
     },
   };
 
