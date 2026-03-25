@@ -206,6 +206,12 @@ export function BridgeForm() {
       avax: { internalId: 6,  shouldQueueOut: false },
       base: { internalId: 30, shouldQueueOut: false },
     },
+    L3: {
+      // L3 tx input（0xb293f97f）显示：toChain=ETH 时 recipientChain=2，toChain=BNB 时 recipientChain=4
+      // 两个方向 shouldQueue 均为 true
+      eth: { internalId: 2, shouldQueueOut: true },
+      bnb: { internalId: 4, shouldQueueOut: true },
+    },
   };
 
   // ── 获取跨链费用 ──────────────────────────────────────────────

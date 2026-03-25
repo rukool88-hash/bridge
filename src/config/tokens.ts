@@ -203,6 +203,23 @@ export const TOKENS: Record<string, TokenConfig> = {
     },
   },
 
+  L3: {
+    symbol: 'L3',
+    name: 'Layer3 (L3 Token)',
+    protocol: 'maivNtt',
+    chainPairs: [['bnb', 'eth']],
+    chains: {
+      bnb: {
+        tokenAddress: '0x46777C76dBbE40fABB2AAB99E33CE20058e76C59',
+        bridgeAddress: '0xBC51f76178a56811fdfe95D3897E6aC2B11DbB62',
+      },
+      eth: {
+        tokenAddress: '0x88909D489678dD17aA6D9609F89B0419Bf78FD9a',
+        bridgeAddress: '0x7926D63FEb9b950908b297cC995B6853bCA21847',
+      },
+    },
+  },
+
   ZCX: {
     symbol: 'ZCX',
     name: 'ZCX Token',
