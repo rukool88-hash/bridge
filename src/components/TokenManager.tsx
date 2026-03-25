@@ -86,7 +86,8 @@ export function TokenManager() {
   const [customList, setCustomList] = useState(getCustomTokens);
 
   const needProxy = form.protocol === 'zcxCustom';
-  const needFee   = form.protocol !== 'lzV1OFT' && form.protocol !== 'lzV2OFT';
+  // 允许用户为 lzV1OFT 填固定 native 费用：非空则跳过链上 estimateSendFee
+  const needFee   = form.protocol !== 'lzV2OFT';
 
   // ── 解码 ──
   function handleDecode() {
@@ -292,9 +293,7 @@ export function TokenManager() {
             )}
             {!needFee && (
               <p className="hint">
-                {form.protocol === 'lzV2OFT'
-                  ? 'lzV2OFT 费用将通过 quoteSend 自动从链上查询，无需 approve'
-                  : 'lzV1OFT 费用将在点击「获取跨链费用」时自动从链上查询'}
+                lzV2OFT 费用将通过 quoteSend 自动从链上查询，无需 approve
               </p>
             )}
           </div>

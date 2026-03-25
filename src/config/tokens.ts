@@ -234,6 +234,9 @@ export const TOKENS: Record<string, TokenConfig> = {
       arb: {
         tokenAddress: '0x580E933D90091b9cE380740E3a4A39c67eB85B4c',
         bridgeAddress: '0xbDFdb3665C7d8374d86D54203E31f5c46c9f1712',
+        // 固定 native 费用（用于跳过 estimateSendFee quote）
+        // 提醒：费用按「源链」native 支付；这里填 0.002（源链=ARB）
+        defaultFeeEstimate: 2000000000000000n,
         // 从成功交易日志推得：dst gasLimit=200000（0x30D40）
         // lzV1 adapterParams 编码：0x0001 + uint256(gasLimit) = 2字节版本 + 32字节gas = 34字节
         lzV1AdapterParams: '0x00010000000000000000000000000000000000000000000000000000000030D40',
@@ -241,7 +244,10 @@ export const TOKENS: Record<string, TokenConfig> = {
       eth: {
         tokenAddress: '0x580E933D90091b9cE380740E3a4A39c67eB85B4c',
         bridgeAddress: '0x580E933D90091b9cE380740E3a4A39c67eB85B4c',
-        lzV1AdapterParams: '0x00010000000000000000000000000000000000000000000000000000000030D40',
+        // 固定 native 费用（用于跳过 estimateSendFee quote）
+        // 提醒：费用按「源链」native 支付；这里填 0.002（源链=ETH）
+        defaultFeeEstimate: 2000000000000000n,
+        lzV1AdapterParams: '0x00010000000000000000000000000000000000000000000000000000000000030D40',
       },
     },
   },

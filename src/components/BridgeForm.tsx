@@ -47,6 +47,23 @@ function addressToBytes32(addr: Address): `0x${string}` {
 }
 
 /**
+ * LZ V1 OFT adapterParams 标准长度：0x + 2字节(0x0001) + 32字节(uint256 gasLimit)
+ * 也就是 34 字节（不含 0x 为 68 hex chars）。
+ * 避免 tokens.ts 里手工拼接导致长度（bytes）不符合 relayer 校验。
+ */
+function normalizeLzV1AdapterParams(adapterParams?: `0x${string}`): `0x${string}` {
+  if (!adapterParams) return '0x' as `0x${string}`;
+  if (!adapterParams.startsWith('0x')) return adapterParams;
+
+  const s = adapterParams.toLowerCase().slice(2); // drop 0x
+  if (!s.startsWith('0001')) return adapterParams;
+
+  const rest = s.slice(4); // uint256(gasLimit) hex chars
+  const restFixed = rest.length >= 64 ? rest.slice(-64) : rest.padStart(64, '0');
+  return (`0x0001${restFixed}` as `0x${string}`);
+}
+
+/**
  * LZ V2 OFT extraOptions：version3 + executor LZ_RECEIVE gasLimit=220000
  * 与成功交易完全一致（BNB和ETH两笔tx的extraOptions均为此值）
  */
@@ -181,7 +198,10 @@ export function BridgeForm() {
     allowance != null && amountWei > 0n && allowance < amountWei;
   const isBobaFixed = tokenCfg.protocol === 'bobaCustom';
   const isMaivNtt   = tokenCfg.protocol === 'maivNtt';
-  const needsQuote  = !(isBobaFixed || isMaivNtt);
+  // lzV1OFT：如果配置了固定 native 费用（defaultFeeEstimate），则跳过链上 estimateSendFee
+  const isLzV1FixedFee =
+    tokenCfg.protocol === 'lzV1OFT' && (fromTokenCfg.defaultFeeEstimate ?? 0n) > 0n;
+  const needsQuote  = !(isBobaFixed || isMaivNtt || isLzV1FixedFee);
 
   // MAIV NTT 内部链配置：每个代币在各链上的内部 ID 与 shouldQueue
   type MaivNttChainConfig = { internalId: number; shouldQueueOut: boolean };
@@ -267,7 +287,7 @@ export function BridgeForm() {
           false,
           tokenCfg.protocol === 'zcxCustom'
             ? ZCX_ADAPTER_PARAMS
-            : (fromTokenCfg.lzV1AdapterParams ?? ('0x' as `0x${string}`)),
+            : normalizeLzV1AdapterParams(fromTokenCfg.lzV1AdapterParams),
         ],
       }) as [bigint, bigint];
 
@@ -312,8 +332,10 @@ export function BridgeForm() {
         ? (fromTokenCfg.defaultFeeEstimate ?? 0n)
         : tokenCfg.protocol === 'maivNtt'
           ? 0n
+          : tokenCfg.protocol === 'lzV1OFT' && isLzV1FixedFee
+            ? (fromTokenCfg.defaultFeeEstimate ?? 0n)
           : quoteNative;
-    if (fee == null) { setSendError('请先点击「获取跨链费用」'); return; }
+    if (fee == null) { setSendError('请先获取跨链费用/设置固定费用'); return; }
     setSendError(null);
     setTxHash(null);
     const to = (recipient && recipient.startsWith('0x') ? recipient : address) as Address;
@@ -393,7 +415,7 @@ export function BridgeForm() {
           address: fromTokenCfg.bridgeAddress, abi: lzV1OFTAbi,
           functionName: 'sendFrom',
           args: [address, toChainCfg.lzV1ChainId, addressToPackedBytes(to),
-            amountWei, address, ZERO_ADDRESS, (fromTokenCfg.lzV1AdapterParams ?? ('0x' as `0x${string}`))],
+            amountWei, address, ZERO_ADDRESS, normalizeLzV1AdapterParams(fromTokenCfg.lzV1AdapterParams)],
           value: fee,
         });
 
@@ -538,7 +560,7 @@ export function BridgeForm() {
       </div>
 
       {/* 费用显示 */}
-      {isBobaFixed && (
+      {(isBobaFixed || isLzV1FixedFee) && (
         <div className="fee-info">
           <p>
             预计跨链费用：约 {formatUnits(fromTokenCfg.defaultFeeEstimate ?? 0n, 18)} {fromChainCfg.nativeSymbol}
@@ -546,7 +568,7 @@ export function BridgeForm() {
           </p>
         </div>
       )}
-      {!isBobaFixed && !isMaivNtt && quoteNative != null && (
+      {!(isBobaFixed || isMaivNtt || isLzV1FixedFee) && quoteNative != null && (
         <div className="fee-info">
           <p>
             预计跨链费用：{formatUnits(quoteNative, 18)} {fromChainCfg.nativeSymbol}
