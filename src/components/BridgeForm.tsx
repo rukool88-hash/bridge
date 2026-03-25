@@ -12,7 +12,7 @@ import {
   parseUnits, formatUnits, encodePacked, encodeAbiParameters,
   createPublicClient, http, type Address,
 } from 'viem';
-import { bsc, mainnet, polygon, base, optimism, avalanche } from 'wagmi/chains';
+import { bsc, mainnet, polygon, base, optimism, avalanche, arbitrum } from 'wagmi/chains';
 import type { Chain } from 'viem';
 import { CHAINS, type ChainKey } from '../config/chains';
 import { type TokenKey } from '../config/tokens';
@@ -31,6 +31,7 @@ const CHAIN_ID_TO_VIEM: Record<number, Chain> = {
  8453: base,
    10: optimism,
 43114: avalanche,
+ 42161: arbitrum,
 };
 
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000' as Address;
@@ -266,7 +267,7 @@ export function BridgeForm() {
           false,
           tokenCfg.protocol === 'zcxCustom'
             ? ZCX_ADAPTER_PARAMS
-            : ('0x' as `0x${string}`),
+            : (fromTokenCfg.lzV1AdapterParams ?? ('0x' as `0x${string}`)),
         ],
       }) as [bigint, bigint];
 
@@ -392,7 +393,7 @@ export function BridgeForm() {
           address: fromTokenCfg.bridgeAddress, abi: lzV1OFTAbi,
           functionName: 'sendFrom',
           args: [address, toChainCfg.lzV1ChainId, addressToPackedBytes(to),
-            amountWei, address, ZERO_ADDRESS, '0x'],
+            amountWei, address, ZERO_ADDRESS, (fromTokenCfg.lzV1AdapterParams ?? ('0x' as `0x${string}`))],
           value: fee,
         });
 
@@ -438,6 +439,7 @@ export function BridgeForm() {
          137:   { chainId: '0x89',   chainName: 'Polygon Mainnet',   nativeCurrency: { name: 'POL',   symbol: 'POL', decimals: 18 }, rpcUrls: ['https://polygon-mainnet.g.alchemy.com/v2/xQ2zrEsiX-z3aSnxG0nMU'], blockExplorerUrls: ['https://polygonscan.com'] },
         8453:   { chainId: '0x2105', chainName: 'Base Mainnet',      nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://base-mainnet.g.alchemy.com/v2/xQ2zrEsiX-z3aSnxG0nMU'],   blockExplorerUrls: ['https://basescan.org'] },
           10:   { chainId: '0xa',    chainName: 'Optimism Mainnet',  nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://opt-mainnet.g.alchemy.com/v2/xQ2zrEsiX-z3aSnxG0nMU'],    blockExplorerUrls: ['https://optimistic.etherscan.io'] },
+       42161:   { chainId: '0xa4b1', chainName: 'Arbitrum One',       nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://arb-mainnet.g.alchemy.com/v2/xQ2zrEsiX-z3aSnxG0nMU'],  blockExplorerUrls: ['https://arbiscan.io'] },
        43114:   { chainId: '0xa86a', chainName: 'Avalanche Mainnet', nativeCurrency: { name: 'AVAX',  symbol: 'AVAX', decimals: 18 }, rpcUrls: ['https://avax-mainnet.g.alchemy.com/v2/xQ2zrEsiX-z3aSnxG0nMU'],  blockExplorerUrls: ['https://snowtrace.io'] },
         };
         try {

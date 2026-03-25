@@ -14,6 +14,11 @@ export type ChainTokenConfig = {
    * 桥接合约 bridgeAddress 内部调用此代理完成跨链
    */
   oftProxy?: Address;
+  /**
+   * lzV1OFT 专用：adapterParams（传给 estimateSendFee / sendFrom 的 _adapterParams bytes）
+   * 用于像 GSWIFT 这种需要指定执行 gas 的 OFT
+   */
+  lzV1AdapterParams?: `0x${string}`;
 };
 
 export type TokenConfig = {
@@ -216,6 +221,26 @@ export const TOKENS: Record<string, TokenConfig> = {
       eth: {
         tokenAddress: '0x88909D489678dD17aA6D9609F89B0419Bf78FD9a',
         bridgeAddress: '0x7926D63FEb9b950908b297cC995B6853bCA21847',
+      },
+    },
+  },
+
+  GSWIFT: {
+    symbol: 'GSWIFT',
+    name: 'GameSwift DAO: GSWIFT Token',
+    protocol: 'lzV1OFT',
+    chainPairs: [['arb', 'eth']],
+    chains: {
+      arb: {
+        tokenAddress: '0x580E933D90091b9cE380740E3a4A39c67eB85B4c',
+        bridgeAddress: '0xbDFdb3665C7d8374d86D54203E31f5c46c9f1712',
+        // 从成功交易日志推得：dst gasLimit=200000（0x30D40）
+        lzV1AdapterParams: '0x00010000000000000000000000000000000000000000000000000000000030D40',
+      },
+      eth: {
+        tokenAddress: '0x580E933D90091b9cE380740E3a4A39c67eB85B4c',
+        bridgeAddress: '0x580E933D90091b9cE380740E3a4A39c67eB85B4c',
+        lzV1AdapterParams: '0x00010000000000000000000000000000000000000000000000000000000030D40',
       },
     },
   },

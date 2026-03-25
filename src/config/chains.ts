@@ -41,6 +41,16 @@ export const CHAINS = {
     rpcUrl: 'https://opt-mainnet.g.alchemy.com/v2/xQ2zrEsiX-z3aSnxG0nMU',
     blockExplorer: 'https://optimistic.etherscan.io',
   },
+  arb: {
+    chainId: 42161,
+    name: 'Arbitrum',
+    nativeSymbol: 'ETH',
+    // 当前项目中暂未使用 LZ V2，EID 预留为 0
+    eid: 0 as const,
+    lzV1ChainId: 110 as const, // 从成功 tx：ETH→ARB 的 dstChainId=0x6e=110
+    rpcUrl: 'https://arb-mainnet.g.alchemy.com/v2/xQ2zrEsiX-z3aSnxG0nMU',
+    blockExplorer: 'https://arbiscan.io',
+  },
   base: {
     chainId: 8453,
     name: 'BASE',

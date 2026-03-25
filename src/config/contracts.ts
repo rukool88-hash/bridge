@@ -11,6 +11,7 @@ export const TOKEN_ADDRESS: Record<ChainKey, `0x${string}`> = {
   eth: '0x42bbfa2e77757c645eeaad1655e0911a7553efbc',
   polygon: ZERO,
   op: ZERO,
+  arb: ZERO,
   base: ZERO,
   avax: ZERO,
 };
@@ -21,6 +22,7 @@ export const OFT_ADDRESS: Record<ChainKey, `0x${string}`> = {
   eth: '0x1A36E24D61BC1aDa68C21C2Da1aD53EaB8E03e55',
   polygon: ZERO,
   op: ZERO,
+  arb: ZERO,
   base: ZERO,
   avax: ZERO,
 };

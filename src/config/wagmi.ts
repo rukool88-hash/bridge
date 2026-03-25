@@ -1,9 +1,9 @@
 import { http, createConfig } from 'wagmi';
 import { injected } from 'wagmi/connectors';
-import { bsc, mainnet, polygon, base, optimism, avalanche } from 'wagmi/chains';
+import { bsc, mainnet, polygon, base, optimism, avalanche, arbitrum } from 'wagmi/chains';
 
 export const config = createConfig({
-  chains: [bsc, mainnet, polygon, base, optimism, avalanche],
+  chains: [bsc, mainnet, polygon, base, optimism, avalanche, arbitrum],
   connectors: [injected()],
   transports: {
     [bsc.id]:        http('https://bsc.publicnode.com'),
@@ -12,5 +12,6 @@ export const config = createConfig({
     [base.id]:       http('https://base-mainnet.g.alchemy.com/v2/xQ2zrEsiX-z3aSnxG0nMU'),
     [optimism.id]:   http('https://opt-mainnet.g.alchemy.com/v2/xQ2zrEsiX-z3aSnxG0nMU'),
     [avalanche.id]:  http('https://avax-mainnet.g.alchemy.com/v2/xQ2zrEsiX-z3aSnxG0nMU'),
+    [arbitrum.id]:   http('https://arb-mainnet.g.alchemy.com/v2/xQ2zrEsiX-z3aSnxG0nMU'),
   },
 });
